@@ -1,22 +1,29 @@
 #!/usr/bin/env python3
 """Say What Actually Broke — one-line error copy.
 
-Writes a single error line (<= 200 chars, UTF-8, non-blank) to
-/output/entry.txt. The judge ranks by: names the real failure, funny on
-a single read, ship-quality.
+Writes a single line of error copy to /output/entry.txt.
+Gate: 1..200 chars, non-blank, UTF-8. Judge ranks by funniness + truth.
 """
 import os
+import sys
 
 LINE = "The server crashed because the deploy went out at 2am and nobody paged anyone. We found out when the customer emailed us."
+MAX = 200
+
+
+def emit(line: str, out: str = "/output/entry.txt") -> None:
+    if not (1 <= len(line) <= MAX) or not line.strip():
+        sys.exit("error line failed the gate")
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    with open(out, "w", encoding="utf-8") as f:
+        f.write(line + "\n")
 
 
 def main() -> None:
-    out = "/output/entry.txt"
-    os.makedirs(os.path.dirname(out), exist_ok=True)
-    assert 1 <= len(LINE) <= 200, "error line out of range"
-    assert LINE.strip() == LINE, "line must be non-blank"
-    with open(out, "w", encoding="utf-8") as f:
-        f.write(LINE + "\n")
+    emit(LINE)
+    with open("/output/entry.txt", "rb") as f:
+        data = f.read()
+    assert data.decode("utf-8").strip() == LINE, "confirm failed"
 
 
 if __name__ == "__main__":
